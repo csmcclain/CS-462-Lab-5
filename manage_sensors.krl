@@ -2,7 +2,7 @@ ruleset manage_sensors {
 
     meta {
         use module io.picolabs.wrangler alias wrangler
-        shares show_children, show_sensors
+        shares show_children, sensors
     }
 
     global {
@@ -10,7 +10,7 @@ ruleset manage_sensors {
             wrangler:children()
         }
 
-        show_sensors = function() {
+        sensors = function() {
             ent:sensors
         }
 
@@ -22,14 +22,27 @@ ruleset manage_sensors {
         defaultSMSReceiver = "8013191995"
     }
 
+    rule init {
+        select when wrangler ruleset_installed
+
+        if (ent:sensors) then noop()
+        
+        notfired {
+          ent:sensors := {}.klog("Initialized sensors entity variable to: ")
+        }
+      }
+
     rule add_sensor {
         select when sensor new_sensor
 
         pre {
             newSensorName = generate_name()
+            exists = ent:sensors{newSensorName} != null
         }
 
-        fired {
+        if (exists) then noop()
+
+        notfired {
             raise wrangler event "new_child_request" attributes {
                 "name": newSensorName,
                 "backgroundColor": "#ffa500"
@@ -161,7 +174,7 @@ ruleset manage_sensors {
     }
 
     rule remove_sensor {
-        select when sensor remove_sensor
+        select when sensor unneeded_sensor
 
         pre {
             sensorName = event:attrs{"name"}.klog("received sensor name to remove: ")
