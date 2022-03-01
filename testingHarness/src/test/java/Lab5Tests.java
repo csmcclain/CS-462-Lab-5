@@ -112,7 +112,7 @@ public class Lab5Tests {
 
     @Test
     public void testMultSensor() throws IOException, InterruptedException {
-        var numPicos = 2;
+        var numPicos = 10;
         for (int i = 0; i < numPicos; i++) {
             addSensor();
         }
