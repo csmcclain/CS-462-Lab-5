@@ -2,10 +2,10 @@ ruleset wovyn_base {
 
 
     meta {
-        use module twilio.api alias twilio
-            with
-                accountSid = meta:rulesetConfig{"accountSid"}.klog("configured accountsid of ")
-                authToken = meta:rulesetConfig{"authToken"}.klog("configured authtoken of ")
+        // use module twilio.api alias twilio
+        //     with
+        //         accountSid = meta:rulesetConfig{"accountSid"}.klog("configured accountsid of ")
+        //         authToken = meta:rulesetConfig{"authToken"}.klog("configured authtoken of ")
         shares get_threshold, get_receiver_of_sms
     }
 
@@ -79,7 +79,7 @@ ruleset wovyn_base {
         }
 
         // No action is needed we will always evaluate the postlude
-        twilio:sendSMS(receiver, sender_of_sms, message)
+        //twilio:sendSMS(receiver, sender_of_sms, message)
     }
 
     rule configuration_change {
