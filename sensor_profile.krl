@@ -10,7 +10,7 @@ ruleset sensor_profile {
             {
                 "location": ent:location == null => "Not Configured" | ent:location,
                 "name": ent:name == null => "Not Configured" | ent:name,
-                "SMS_receiver": ent:smsReceiver == null => "8013191995" | ent:smsReceiver,
+                "SMS_receiver": ent:smsReceiver == null => "0000000000" | ent:smsReceiver,
                 "threshold": ent:threshold == null => 75 | ent:threshold
             }
         }

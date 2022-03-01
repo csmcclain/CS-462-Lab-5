@@ -1,4 +1,4 @@
-ruleset manage_sensor {
+ruleset manage_sensors {
 
     meta {
         use module io.picolabs.wrangler alias wrangler
@@ -17,6 +17,9 @@ ruleset manage_sensor {
         generate_name = function() {
             <<Sensor #{wrangler:children().length() + 1}>>
         }
+
+        defaultThreshold = 75
+        defaultSMSReceiver = "8013191995"
     }
 
     rule add_sensor {
@@ -35,7 +38,7 @@ ruleset manage_sensor {
     }
 
     rule new_sensor_created {
-        select when wrangler child_initialized
+        select when wrangler new_child_created
 
         pre {
             name = event:attrs{"name"}.klog("sensor_created new child name: ")
@@ -46,14 +49,11 @@ ruleset manage_sensor {
 
         fired {
             ent:sensors{name} := childID
-            raise sensor event "initialize_wovyn_base" attributes {
-                "name": name
-            }
         }
     }
 
     rule initialize_picolabs_emitter_ruleset {
-        select when wrangler child_initialized
+        select when wrangler new_child_created
 
         pre {
             eci = event:attrs{"eci"}
@@ -74,7 +74,7 @@ ruleset manage_sensor {
     }
 
     rule initialize_wovyn_ruleset {
-        select when wrangler child_initialized
+        select when wrangler new_child_created
 
         pre {
             eci = event:attrs{"eci"}
@@ -95,7 +95,7 @@ ruleset manage_sensor {
     }
 
     rule initialize_temperature_store_ruleset {
-        select when wrangler child_initialized
+        select when wrangler new_child_created
 
         pre {
             eci = event:attrs{"eci"}
@@ -116,9 +116,10 @@ ruleset manage_sensor {
     }
     
     rule initialize_sensor_profile_ruleset {
-        select when wrangler child_initialized
+        select when wrangler new_child_created
 
         pre {
+            name = event:attrs{"name"}
             eci = event:attrs{"eci"}
         }
 
@@ -131,6 +132,29 @@ ruleset manage_sensor {
                     "absoluteURL": meta:rulesetURI,
                     "rid": "sensor_profile",
                     "config": {}
+                }
+            }
+        )
+    }
+
+    rule configure_child_sensor_profile{
+        select when wrangler child_initialized
+
+        pre {
+            eci = event:attrs{"eci"}
+            name = event:attrs{"name"}
+        }
+
+        event:send(
+            {
+                "eci": eci,
+                "eid": "configure-ruleset",
+                "domain": "sensor", "type": "profile_update",
+                "attrs": {
+                    "SMS_receiver": defaultSMSReceiver,
+                    "threshold": defaultThreshold,
+                    "location": "unspecified",
+                    "name": name
                 }
             }
         )
