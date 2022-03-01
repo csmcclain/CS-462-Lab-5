@@ -2,20 +2,23 @@ ruleset manage_sensors {
 
     meta {
         use module io.picolabs.wrangler alias wrangler
-        shares show_children, sensors
+        shares sensors, get_temperatures
     }
 
     global {
-        show_children = function() {
-            wrangler:children()
-        }
 
         sensors = function() {
             ent:sensors
         }
 
         generate_name = function() {
-            <<Sensor #{wrangler:children().length() + 1}>>
+            <<Sensor #{random:uuid}>>
+        }
+
+        get_temperatures = function() {
+            ent:sensors.values().map(function(eci) {
+                wrangler:picoQuery(eci, "temperature_store", "temperatures")
+            })
         }
 
         defaultThreshold = 75
@@ -192,5 +195,11 @@ ruleset manage_sensors {
         }
     }
 
+    rule flush_sensors {
+        select when sensor flush_sensors
 
+        always {
+            ent:sensors := {}
+        }
+    }
 }
